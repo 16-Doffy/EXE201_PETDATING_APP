@@ -37,6 +37,7 @@ export default function HomeScreen() {
         {categories.map(c => (
           <CategoryChip key={c.key} label={c.label} emoji={c.emoji} isActive={state.selectedCategory === c.key} onPress={() => setCategory(c.key as typeof state.selectedCategory)} />
         ))}
+        <View style={{ width: 20 }} />
       </ScrollView>
       <View style={styles.genderFilters}>
         {genderFilters.map(g => (
@@ -76,7 +77,7 @@ const styles = StyleSheet.create({
   chipTextActive: { color: Colors.textInverse },
   cards: { paddingBottom: 100 },
   cardWrapper: { marginBottom: Spacing.xl },
-  empty: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 100 },
+  empty: { flexGrow: 1, justifyContent: 'center', alignItems: 'center', minHeight: 200 },
   emptyEmoji: { fontSize: 60, marginBottom: Spacing.lg },
   emptyTitle: { fontSize: FontSize.xl, fontWeight: '600', color: Colors.textPrimary },
 });

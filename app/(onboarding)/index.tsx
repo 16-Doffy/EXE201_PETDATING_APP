@@ -15,25 +15,38 @@ export default function OnboardingScreen() {
   const router = useRouter();
   const { completeOnboarding } = useAppContext();
 
-  const handleStart = () => { completeOnboarding(); router.replace('/(tabs)'); };
+  const handleStart = () => {
+    completeOnboarding();
+    router.replace('/(tabs)');
+  };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.skip} onPress={handleStart}><Text style={styles.skipText}>Skip</Text></TouchableOpacity>
-      <View style={styles.slides}>
-        {slides.map(slide => (
+      <View style={styles.top}>
+        <TouchableOpacity style={styles.skip} onPress={handleStart}>
+          <Text style={styles.skipText}>Skip</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.center}>
+        {slides.map((slide) => (
           <View key={slide.id} style={[styles.slide, { backgroundColor: slide.bgColor }]}>
-            <View style={styles.emojiContainer}><Text style={styles.emoji}>{slide.emoji}</Text></View>
+            <View style={styles.emojiContainer}>
+              <Text style={styles.emoji}>{slide.emoji}</Text>
+            </View>
             <Text style={styles.title}>{slide.title}</Text>
             <Text style={styles.description}>{slide.description}</Text>
           </View>
         ))}
       </View>
-      <View style={styles.dots}>
-        {slides.map((s, i) => <View key={s.id} style={[styles.dot, i === 0 && styles.dotActive]} />)}
-      </View>
-      <View style={styles.cta}>
-        <TouchableOpacity style={styles.ctaButton} onPress={handleStart}><Text style={styles.ctaText}>Get Started</Text></TouchableOpacity>
+      <View style={styles.bottom}>
+        <View style={styles.dots}>
+          {slides.map((s, i) => (
+            <View key={s.id} style={[styles.dot, i === 0 && styles.dotActive]} />
+          ))}
+        </View>
+        <TouchableOpacity style={styles.ctaButton} onPress={handleStart}>
+          <Text style={styles.ctaText}>Get Started</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -41,18 +54,19 @@ export default function OnboardingScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
-  skip: { position: 'absolute', top: 60, right: Spacing.xl, zIndex: 10, paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm },
+  top: { paddingTop: 60, paddingHorizontal: Spacing.xl, alignItems: 'flex-end' },
+  skip: { paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm },
   skipText: { fontSize: FontSize.md, fontWeight: '500', color: Colors.textSecondary },
-  slides: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: Spacing.xl },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: Spacing.xl },
   slide: { width: SCREEN_WIDTH - 40, alignItems: 'center', justifyContent: 'center', paddingVertical: Spacing.huge, paddingHorizontal: Spacing.xl, borderRadius: BorderRadius.card },
   emojiContainer: { width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,255,255,0.6)', justifyContent: 'center', alignItems: 'center', marginBottom: Spacing.xxxl, ...Shadows.card },
   emoji: { fontSize: 80 },
   title: { fontSize: FontSize.xxxl, fontWeight: '700', color: Colors.textPrimary, textAlign: 'center', marginBottom: Spacing.lg, lineHeight: 36 },
   description: { fontSize: FontSize.md, color: Colors.textSecondary, textAlign: 'center', lineHeight: 24, paddingHorizontal: Spacing.md },
-  dots: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginVertical: Spacing.xl },
+  bottom: { paddingHorizontal: Spacing.xl, paddingBottom: 40 },
+  dots: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginBottom: Spacing.xl },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.border, marginHorizontal: 4 },
   dotActive: { width: 24, backgroundColor: Colors.primary },
-  cta: { paddingHorizontal: Spacing.xl, paddingBottom: 40 },
   ctaButton: { backgroundColor: Colors.primary, paddingVertical: Spacing.lg, borderRadius: BorderRadius.btn, alignItems: 'center', ...Shadows.btn },
   ctaText: { fontSize: FontSize.lg, fontWeight: '600', color: Colors.textInverse },
 });

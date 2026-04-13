@@ -14,7 +14,7 @@ export function EmptyState({ emoji, title, description }: EmptyStateProps) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: Spacing.xxxl, paddingBottom: 100 },
+  container: { flexGrow: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: Spacing.xxxl, paddingBottom: 100 },
   emoji: { fontSize: 80, marginBottom: Spacing.xl },
   title: { fontSize: FontSize.xl, fontWeight: '600', color: Colors.textPrimary, textAlign: 'center', marginBottom: Spacing.sm },
   description: { fontSize: FontSize.md, color: Colors.textSecondary, textAlign: 'center', lineHeight: 24 },

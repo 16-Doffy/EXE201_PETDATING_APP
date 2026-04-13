@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: FontSize.sm, color: Colors.textSecondary, marginTop: Spacing.xs },
   list: { paddingHorizontal: Spacing.xl, paddingBottom: 120 },
   item: { flexDirection: 'row', alignItems: 'center', paddingVertical: Spacing.lg },
-  unread: { backgroundColor: Colors.pastelOrange + '20', marginHorizontal: -Spacing.xl, paddingHorizontal: Spacing.xl, borderRadius: BorderRadius.md },
+  unread: { backgroundColor: Colors.pastelOrange + '20', paddingHorizontal: Spacing.lg, paddingVertical: Spacing.md, borderRadius: BorderRadius.md },
   info: { flex: 1, marginLeft: Spacing.md },
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   name: { fontSize: FontSize.lg, fontWeight: '500', color: Colors.textPrimary },

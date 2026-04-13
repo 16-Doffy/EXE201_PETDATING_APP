@@ -20,6 +20,7 @@ export default function ExploreScreen() {
         <CategoryChip label="Nearby" emoji="📍" isActive />
         <CategoryChip label="Online" emoji="🟢" />
         <CategoryChip label="New" emoji="✨" />
+        <View style={{ width: 20 }} />
       </ScrollView>
       <ScrollView contentContainerStyle={styles.results} showsVerticalScrollIndicator={false}>
         <Text style={styles.resultTitle}>{getFilteredPets().length} pets found</Text>
@@ -41,7 +42,7 @@ const styles = StyleSheet.create({
   searchIcon: { fontSize: 18, marginRight: Spacing.sm },
   searchInput: { flex: 1, fontSize: FontSize.md, color: Colors.textPrimary },
   filters: { paddingHorizontal: Spacing.xl, paddingVertical: Spacing.md, gap: Spacing.sm },
-  results: { paddingHorizontal: Spacing.xl, paddingBottom: 120 },
+  results: { paddingHorizontal: Spacing.xl, paddingBottom: 100 },
   resultTitle: { fontSize: FontSize.md, color: Colors.textSecondary, marginBottom: Spacing.lg },
   cardWrapper: { marginBottom: Spacing.xl },
 });

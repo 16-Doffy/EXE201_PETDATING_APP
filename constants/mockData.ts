@@ -4,17 +4,21 @@ export interface Pet { id: string; name: string; species: 'dog' | 'cat' | 'bird'
 export interface ChatMessage { id: string; text: string; isMine: boolean; timestamp: Date; }
 export interface Conversation { id: string; pet: Pet; messages: ChatMessage[]; lastMessage: string; lastMessageTime: Date; unreadCount: number; }
 
-const photo = (n: number) => `https://i.pravatar.cc/400?img=${n}`;
+// Pet images - using placeholder services that are fast and reliable
+const petPhoto = (n: number) => `https://placedog.net/600/800?id=${n + 10}`;
+const petThumb = (n: number) => `https://placedog.net/80/80?id=${n + 10}`;
+const catPhoto = (n: number) => `https://loremflickr.com/600/800/cat?lock=${n * 7}`;
+const catThumb = (n: number) => `https://loremflickr.com/80/80/cat?lock=${n * 7 + 1}`;
 
 export const mockPets: Pet[] = [
-  { id: '1', name: 'Luna', species: 'dog', breed: 'Golden Retriever', age: 18, gender: 'female', distance: 2.5, photos: [photo(101)], bio: 'Luna loves long walks in the park!', traits: ['Playful', 'Friendly'], owner: { id: 'o1', name: 'Sarah Chen', avatar: photo(1) }, isOnline: true },
-  { id: '2', name: 'Max', species: 'dog', breed: 'French Bulldog', age: 24, gender: 'male', distance: 3.1, photos: [photo(102)], bio: 'Max is a chill dude who loves naps.', traits: ['Calm', 'Affectionate'], owner: { id: 'o2', name: 'Mike Rodriguez', avatar: photo(3) }, isOnline: false },
-  { id: '3', name: 'Whiskers', species: 'cat', breed: 'British Shorthair', age: 12, gender: 'male', distance: 1.8, photos: [photo(103)], bio: 'Whiskers is sophisticated and independent.', traits: ['Elegant', 'Independent'], owner: { id: 'o3', name: 'Emily Watson', avatar: photo(5) }, isOnline: true },
-  { id: '4', name: 'Bella', species: 'dog', breed: 'Labrador', age: 30, gender: 'female', distance: 4.2, photos: [photo(104)], bio: 'Bella is the friendliest dog!', traits: ['Adventurous', 'Friendly'], owner: { id: 'o4', name: 'David Kim', avatar: photo(7) }, isOnline: true },
-  { id: '5', name: 'Mochi', species: 'cat', breed: 'Scottish Fold', age: 8, gender: 'female', distance: 0.5, photos: [photo(105)], bio: 'Mochi is tiny but mighty!', traits: ['Cuddly', 'Sweet'], owner: { id: 'o5', name: 'Anna Lee', avatar: photo(9) }, isOnline: false },
-  { id: '6', name: 'Charlie', species: 'dog', breed: 'Beagle', age: 36, gender: 'male', distance: 5.0, photos: [photo(106)], bio: 'Charlie has an excellent nose!', traits: ['Curious', 'Social'], owner: { id: 'o6', name: 'Tom Baker', avatar: photo(11) }, isOnline: true },
-  { id: '7', name: 'Cleo', species: 'cat', breed: 'Maine Coon', age: 20, gender: 'female', distance: 2.9, photos: [photo(107)], bio: 'Cleo is fluffy royalty!', traits: ['Regal', 'Majestic'], owner: { id: 'o7', name: 'Sophie Martin', avatar: photo(13) }, isOnline: false },
-  { id: '8', name: 'Buddy', species: 'dog', breed: 'Corgi', age: 14, gender: 'male', distance: 1.2, photos: [photo(108)], bio: "Buddy's got the best smile!", traits: ['Herding', 'Smart'], owner: { id: 'o8', name: 'James Wilson', avatar: photo(15) }, isOnline: true },
+  { id: '1', name: 'Luna', species: 'dog', breed: 'Golden Retriever', age: 18, gender: 'female', distance: 2.5, photos: [petPhoto(100)], bio: 'Luna loves long walks in the park!', traits: ['Playful', 'Friendly'], owner: { id: 'o1', name: 'Sarah Chen', avatar: petThumb(100) }, isOnline: true },
+  { id: '2', name: 'Max', species: 'dog', breed: 'French Bulldog', age: 24, gender: 'male', distance: 3.1, photos: [petPhoto(200)], bio: 'Max is a chill dude who loves naps.', traits: ['Calm', 'Affectionate'], owner: { id: 'o2', name: 'Mike Rodriguez', avatar: petThumb(200) }, isOnline: false },
+  { id: '3', name: 'Whiskers', species: 'cat', breed: 'British Shorthair', age: 12, gender: 'male', distance: 1.8, photos: [catPhoto(300)], bio: 'Whiskers is sophisticated and independent.', traits: ['Elegant', 'Independent'], owner: { id: 'o3', name: 'Emily Watson', avatar: catThumb(300) }, isOnline: true },
+  { id: '4', name: 'Bella', species: 'dog', breed: 'Labrador', age: 30, gender: 'female', distance: 4.2, photos: [petPhoto(400)], bio: 'Bella is the friendliest dog!', traits: ['Adventurous', 'Friendly'], owner: { id: 'o4', name: 'David Kim', avatar: petThumb(400) }, isOnline: true },
+  { id: '5', name: 'Mochi', species: 'cat', breed: 'Scottish Fold', age: 8, gender: 'female', distance: 0.5, photos: [catPhoto(500)], bio: 'Mochi is tiny but mighty!', traits: ['Cuddly', 'Sweet'], owner: { id: 'o5', name: 'Anna Lee', avatar: catThumb(500) }, isOnline: false },
+  { id: '6', name: 'Charlie', species: 'dog', breed: 'Beagle', age: 36, gender: 'male', distance: 5.0, photos: [petPhoto(600)], bio: 'Charlie has an excellent nose!', traits: ['Curious', 'Social'], owner: { id: 'o6', name: 'Tom Baker', avatar: petThumb(600) }, isOnline: true },
+  { id: '7', name: 'Cleo', species: 'cat', breed: 'Maine Coon', age: 20, gender: 'female', distance: 2.9, photos: [catPhoto(700)], bio: 'Cleo is fluffy royalty!', traits: ['Regal', 'Majestic'], owner: { id: 'o7', name: 'Sophie Martin', avatar: catThumb(700) }, isOnline: false },
+  { id: '8', name: 'Buddy', species: 'dog', breed: 'Corgi', age: 14, gender: 'male', distance: 1.2, photos: [petPhoto(800)], bio: "Buddy's got the best smile!", traits: ['Herding', 'Smart'], owner: { id: 'o8', name: 'James Wilson', avatar: petThumb(800) }, isOnline: true },
 ];
 
 export const mockConversations: Conversation[] = [
@@ -22,4 +26,4 @@ export const mockConversations: Conversation[] = [
   { id: 'c2', pet: mockPets[2], messages: [{ id: 'm3', text: 'Hey! Whiskers seemed interested 😸', isMine: false, timestamp: new Date() }], lastMessage: 'Hey! Whiskers seemed interested', lastMessageTime: new Date(), unreadCount: 0 },
 ];
 
-export const currentUser = { id: 'user1', name: 'Alex Johnson', email: 'alex@example.com', avatar: photo(47) };
+export const currentUser = { id: 'user1', name: 'Alex Johnson', email: 'alex@example.com', avatar: petThumb(900) };

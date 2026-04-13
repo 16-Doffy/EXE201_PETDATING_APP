@@ -1,5 +1,4 @@
 import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Colors, FontSize, BorderRadius, Spacing, Shadows } from '@/constants/theme';
 import { Avatar } from '@/components/ui/Avatar';
 import { Pet } from '@/constants/mockData';
@@ -14,8 +13,8 @@ export function PetCard({ pet, onPress, onLike, onSkip, showActions = true }: Pe
   const ageLabel = pet.age >= 12 ? `${Math.floor(pet.age / 12)} year${pet.age >= 24 ? 's' : ''}` : `${pet.age} month${pet.age !== 1 ? 's' : ''}`;
   return (
     <TouchableOpacity style={[styles.container, Shadows.card]} onPress={onPress} activeOpacity={0.95}>
-      <Image source={{ uri: pet.photos[0] }} style={styles.image} />
-      <LinearGradient colors={['transparent', 'transparent', 'rgba(0,0,0,0.7)']} style={styles.gradient} />
+      <Image source={{ uri: pet.photos[0] }} style={styles.image} resizeMode="cover" />
+      <View style={styles.gradient} />
       {pet.isOnline && <View style={styles.badge}><View style={styles.onlineDot} /><Text style={styles.onlineText}>Online</Text></View>}
       <View style={styles.overlay}>
         <View style={styles.info}>
@@ -43,8 +42,8 @@ export function PetCard({ pet, onPress, onLike, onSkip, showActions = true }: Pe
 
 const styles = StyleSheet.create({
   container: { width: CARD_WIDTH, height: CARD_HEIGHT, borderRadius: BorderRadius.card, backgroundColor: Colors.surface, overflow: 'hidden', alignSelf: 'center' },
-  image: { width: '100%', height: '100%', position: 'absolute' },
-  gradient: { position: 'absolute', bottom: 0, left: 0, right: 0, height: '60%' },
+  image: { width: '100%', height: '100%', position: 'absolute', backgroundColor: Colors.pastelOrange },
+  gradient: { position: 'absolute', bottom: 0, left: 0, right: 0, height: '60%', backgroundColor: 'rgba(0,0,0,0.1)' },
   badge: { position: 'absolute', top: Spacing.lg, left: Spacing.lg, flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)', paddingHorizontal: Spacing.md, paddingVertical: Spacing.xs, borderRadius: BorderRadius.chip },
   onlineDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.success, marginRight: Spacing.xs },
   onlineText: { fontSize: FontSize.xs, color: Colors.textInverse, fontWeight: '500' },
