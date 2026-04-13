@@ -1,0 +1,22 @@
+import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import 'react-native-reanimated';
+import { AppProvider } from '@/context/AppContext';
+import { Colors } from '@/constants/theme';
+
+export default function RootLayout() {
+  return (
+    <AppProvider>
+      <ThemeProvider value={{ ...DefaultTheme, colors: { ...DefaultTheme.colors, background: Colors.background, card: Colors.surface, text: Colors.textPrimary, primary: Colors.primary, border: Colors.border } }}>
+        <StatusBar style="dark" />
+        <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right', contentStyle: { backgroundColor: Colors.background } }}>
+          <Stack.Screen name="(onboarding)" options={{ animation: 'fade' }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="pet/[id]" options={{ headerShown: true, headerTransparent: true, headerTintColor: Colors.textPrimary, headerBackTitle: 'Back', headerTitle: '' }} />
+          <Stack.Screen name="chat/[id]" options={{ headerShown: true, headerTintColor: Colors.textPrimary, headerBackTitle: 'Back', headerTitle: '' }} />
+        </Stack>
+      </ThemeProvider>
+    </AppProvider>
+  );
+}
