@@ -1,93 +1,313 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useAppContext } from '@/context/AppContext';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useApp } from '@/context/AppContext';
 import { Colors, FontSize, Spacing, BorderRadius, Shadows } from '@/constants/theme';
 import { Avatar } from '@/components/ui/Avatar';
+import { Pet } from '@/constants/mockData';
 
-function SettingsItem({ emoji, label, destructive, onPress }: { emoji: string; label: string; destructive?: boolean; onPress?: () => void }) {
+function SettingsItem({ emoji, label, onPress, destructive }: {
+  emoji: string; label: string; onPress?: () => void; destructive?: boolean;
+}) {
   return (
-    <TouchableOpacity style={styles.item} onPress={onPress}>
-      <Text style={styles.emoji}>{emoji}</Text>
-      <Text style={[styles.label, destructive && styles.destructive]}>{label}</Text>
-      {onPress && <Text style={styles.arrow}>›</Text>}
+    <TouchableOpacity style={styles.settingsItem} onPress={onPress} activeOpacity={0.7}>
+      <Text style={styles.settingsEmoji}>{emoji}</Text>
+      <Text style={[styles.settingsLabel, destructive && styles.destructive]}>{label}</Text>
+      <Text style={styles.settingsArrow}>›</Text>
     </TouchableOpacity>
   );
 }
 
+function StatBadge({ emoji, value, label }: { emoji: string; value: number; label: string }) {
+  return (
+    <View style={styles.statBadge}>
+      <Text style={styles.statEmoji}>{emoji}</Text>
+      <Text style={styles.statValue}>{value}</Text>
+      <Text style={styles.statLabel}>{label}</Text>
+    </View>
+  );
+}
+
+function TagPill({ label, color }: { label: string; color: string }) {
+  return (
+    <View style={[styles.tagPill, { backgroundColor: color + '40' }]}>
+      <Text style={[styles.tagText, { color }]}>{label}</Text>
+    </View>
+  );
+}
+
+// My pet data (mock current user's pet)
+const myPet: Pet = {
+  id: 'my1',
+  name: 'Buddy 😊',
+  species: 'dog',
+  breed: 'Golden Retriever',
+  age: 24,
+  gender: 'male',
+  distance: 0,
+  photos: ['https://placedog.net/600/800?id=900'],
+  bio: 'Friendly golden boy who loves everyone! Always ready for a game of fetch or a cuddle session.',
+  traits: ['Playful', 'Friendly', 'Trained'],
+  personalityTags: ['Energetic', 'Social', 'Loyal', 'Gentle'],
+  favoriteActivities: ['Beach walks', 'Fetch', 'Swimming', 'Cuddles'],
+  vaccineStatus: 'vaccinated',
+  gallery: ['https://placedog.net/600/800?id=901', 'https://placedog.net/600/800?id=902', 'https://placedog.net/600/800?id=903', 'https://placedog.net/600/800?id=904'],
+  owner: { id: 'user1', name: 'Alex Johnson', avatar: 'https://placedog.net/80/80?id=900' },
+  isOnline: true,
+};
+
 export default function ProfileScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { state, getFavoritePets, completeOnboarding } = useAppContext();
-  const myPet = { id: 'my', photos: ['https://i.pravatar.cc/400?img=68'], name: 'Buddy', breed: 'Mixed Breed' };
+  const { state, getMatchPets, getFavoritePets, completeOnboarding } = useApp();
+  const matches = getMatchPets();
+  const favorites = getFavoritePets();
+
+  const ageLabel = myPet.age >= 12
+    ? `${Math.floor(myPet.age / 12)} year${myPet.age >= 24 ? 's' : ''} old`
+    : `${myPet.age} months old`;
+
+  const vaccineColor = myPet.vaccineStatus === 'vaccinated' ? Colors.success : myPet.vaccineStatus === 'partial' ? '#F59E0B' : Colors.error;
+  const vaccineLabel = myPet.vaccineStatus === 'vaccinated' ? '✅ Vaccinated' : myPet.vaccineStatus === 'partial' ? '🟡 Partial' : '⚠️ Not vaccinated';
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-      <View style={styles.header}><Text style={styles.title}>Profile</Text></View>
-      <View style={[styles.userCard, Shadows.card]}>
-        <Avatar uri={state.user.avatar} size="xl" />
-        <Text style={styles.userName}>{state.user.name}</Text>
-        <Text style={styles.userEmail}>{state.user.email}</Text>
-        <View style={styles.stats}>
-          <View style={styles.stat}><Text style={styles.statNum}>{getFavoritePets().length}</Text><Text style={styles.statLabel}>Favorites</Text></View>
-          <View style={styles.divider} />
-          <View style={styles.stat}><Text style={styles.statNum}>3</Text><Text style={styles.statLabel}>Matches</Text></View>
-          <View style={styles.divider} />
-          <View style={styles.stat}><Text style={styles.statNum}>2</Text><Text style={styles.statLabel}>Playdates</Text></View>
+    <SafeAreaView style={styles.safe} edges={['top']}>
+      <ScrollView
+        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 100 }]}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>Profile 👤</Text>
         </View>
-      </View>
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>My Pet</Text>
-        <View style={[styles.petCard, Shadows.card]}>
-          <Image source={{ uri: myPet.photos[0] }} style={styles.petImage} />
-          <View style={styles.petInfo}><Text style={styles.petName}>{myPet.name}</Text><Text style={styles.petBreed}>{myPet.breed}</Text></View>
-          <TouchableOpacity style={styles.editBtn}><Text style={styles.editIcon}>✏️</Text></TouchableOpacity>
+
+        {/* Pet Hero Card */}
+        <View style={[styles.heroCard, Shadows.lg]}>
+          {/* Cover image */}
+          <Image source={{ uri: myPet.gallery?.[0] || myPet.photos[0] }} style={styles.coverImage} />
+
+          {/* Gradient overlay */}
+          <View style={styles.heroOverlay} />
+
+          {/* Avatar on cover */}
+          <View style={styles.heroAvatarWrap}>
+            <Avatar uri={myPet.photos[0]} name={myPet.name} size="xl" />
+            {myPet.isOnline && (
+              <View style={styles.onlineDot}>
+                <Text style={styles.onlineDotText}>🟢 Online</Text>
+              </View>
+            )}
+          </View>
+
+          {/* Pet name + info on cover */}
+          <View style={styles.heroInfo}>
+            <View style={styles.heroNameRow}>
+              <Text style={styles.heroName}>{myPet.name}</Text>
+              <View style={[styles.genderBadge, myPet.gender === 'male' ? styles.maleBadge : styles.femaleBadge]}>
+                <Text style={styles.genderText}>{myPet.gender === 'male' ? '♂' : '♀'}</Text>
+              </View>
+            </View>
+            <Text style={styles.heroBreed}>🐕 {myPet.breed}</Text>
+            <Text style={styles.heroAge}>{ageLabel}</Text>
+          </View>
         </View>
-      </View>
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Settings</Text>
-        <View style={[styles.settings, Shadows.sm]}>
-          <SettingsItem emoji="👤" label="Edit Profile" />
-          <View style={styles.divider2} />
-          <SettingsItem emoji="🔔" label="Notifications" />
-          <View style={styles.divider2} />
-          <SettingsItem emoji="🔒" label="Privacy" />
+
+        {/* Bio */}
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>📝 About {myPet.name}</Text>
+          <View style={[styles.bioCard, Shadows.sm]}>
+            <Text style={styles.bioText}>{myPet.bio}</Text>
+          </View>
         </View>
-      </View>
-      <View style={styles.section}>
-        <SettingsItem emoji="🚪" label="Log Out" destructive onPress={() => { completeOnboarding(); router.replace('/(onboarding)'); }} />
-      </View>
-      <Text style={styles.version}>PetDating v1.0.0</Text>
-    </ScrollView>
+
+        {/* Stats */}
+        <View style={styles.statsRow}>
+          <StatBadge emoji="❤️" value={favorites.length} label="Likes" />
+          <StatBadge emoji="💖" value={matches.length} label="Matches" />
+          <StatBadge emoji="🎮" value={3} label="Playdates" />
+        </View>
+
+        {/* Personality Tags */}
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>🏷️ Personality</Text>
+          <View style={styles.tagRow}>
+            {myPet.personalityTags?.map((tag, i) => (
+              <TagPill key={i} label={tag} color={Colors.primary} />
+            ))}
+          </View>
+        </View>
+
+        {/* Favorite Activities */}
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>🎯 Favorite Activities</Text>
+          <View style={styles.tagRow}>
+            {myPet.favoriteActivities?.map((act, i) => (
+              <TagPill key={i} label={act} color={Colors.secondary} />
+            ))}
+          </View>
+        </View>
+
+        {/* Vaccine Status */}
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>🏥 Health Status</Text>
+          <TouchableOpacity style={[styles.vaccineCard, Shadows.sm]}>
+            <View style={styles.vaccineLeft}>
+              <Text style={styles.vaccineEmoji}>💉</Text>
+              <Text style={[styles.vaccineText, { color: vaccineColor }]}>{vaccineLabel}</Text>
+            </View>
+            <Text style={styles.vaccineArrow}>Update</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Gallery */}
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>📸 Gallery</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.galleryScroll}>
+            {myPet.gallery?.map((uri, i) => (
+              <View key={i} style={styles.galleryItem}>
+                <Image source={{ uri }} style={styles.galleryImage} />
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* Owner Info */}
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>👤 Owner</Text>
+          <View style={[styles.ownerCard, Shadows.sm]}>
+            <Avatar uri={state.user.avatar} name={state.user.name} size="lg" />
+            <View style={styles.ownerInfo}>
+              <Text style={styles.ownerName}>{state.user.name}</Text>
+              <Text style={styles.ownerEmail}>{state.user.email}</Text>
+            </View>
+            <TouchableOpacity style={styles.editOwnerBtn}>
+              <Text style={styles.editOwnerText}>✏️</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Settings */}
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>⚙️ Settings</Text>
+          <View style={[styles.settingsCard, Shadows.sm]}>
+            <SettingsItem emoji="👤" label="Edit Profile" />
+            <View style={styles.divider} />
+            <SettingsItem emoji="🔔" label="Notifications" />
+            <View style={styles.divider} />
+            <SettingsItem emoji="🔒" label="Privacy & Safety" />
+            <View style={styles.divider} />
+            <SettingsItem emoji="❓" label="Help & Support" />
+            <View style={styles.divider} />
+            <SettingsItem emoji="📱" label="App Info" />
+          </View>
+        </View>
+
+        {/* Logout */}
+        <View style={styles.section}>
+          <SettingsItem
+            emoji="🚪"
+            label="Log Out"
+            destructive
+            onPress={() => { completeOnboarding(); router.replace('/(onboarding)'); }}
+          />
+        </View>
+
+        <Text style={styles.version}>PetDating v1.0.0 💖</Text>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
-  content: { paddingBottom: 120 },
+  safe: { flex: 1, backgroundColor: Colors.background },
+  content: {},
   header: { paddingHorizontal: Spacing.xl, paddingTop: Spacing.lg, paddingBottom: Spacing.md },
-  title: { fontSize: FontSize.xxxl, fontWeight: '700', color: Colors.textPrimary },
-  userCard: { backgroundColor: Colors.surface, marginHorizontal: Spacing.xl, borderRadius: BorderRadius.card, padding: Spacing.xl, alignItems: 'center' },
-  userName: { fontSize: FontSize.xl, fontWeight: '600', color: Colors.textPrimary, marginTop: Spacing.md },
-  userEmail: { fontSize: FontSize.sm, color: Colors.textSecondary, marginTop: Spacing.xs },
-  stats: { flexDirection: 'row', alignItems: 'center', marginTop: Spacing.xl, paddingTop: Spacing.lg, borderTopWidth: 1, borderTopColor: Colors.divider, width: '100%', justifyContent: 'space-around' },
-  stat: { alignItems: 'center' },
-  statNum: { fontSize: FontSize.xxl, fontWeight: '700', color: Colors.primary },
+  title: { fontSize: FontSize.xxxl, fontWeight: '800', color: Colors.textPrimary },
+  heroCard: {
+    marginHorizontal: Spacing.xl, borderRadius: BorderRadius.xxl,
+    overflow: 'hidden', backgroundColor: Colors.surface,
+    marginBottom: Spacing.lg,
+  },
+  coverImage: { width: '100%', height: 200, backgroundColor: Colors.pastelOrange },
+  heroOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.2)',
+  },
+  heroAvatarWrap: { position: 'absolute', bottom: -40, left: Spacing.xl },
+  onlineDot: { marginTop: Spacing.xs, flexDirection: 'row', alignItems: 'center' },
+  onlineDotText: { fontSize: FontSize.xs, color: Colors.success, fontWeight: '600' },
+  heroInfo: { padding: Spacing.xl, paddingTop: Spacing.md },
+  heroNameRow: { flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.xs },
+  heroName: { fontSize: FontSize.xxl, fontWeight: '800', color: Colors.textPrimary, marginRight: Spacing.sm },
+  genderBadge: { width: 24, height: 24, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
+  maleBadge: { backgroundColor: Colors.pastelPurple },
+  femaleBadge: { backgroundColor: Colors.pastelPink },
+  genderText: { fontSize: 12, fontWeight: '700', color: Colors.textPrimary },
+  heroBreed: { fontSize: FontSize.md, color: Colors.textSecondary, marginBottom: 2 },
+  heroAge: { fontSize: FontSize.sm, color: Colors.textSecondary },
+  section: { paddingHorizontal: Spacing.xl, marginBottom: Spacing.lg },
+  sectionLabel: {
+    fontSize: FontSize.md, fontWeight: '700', color: Colors.textSecondary,
+    textTransform: 'uppercase', letterSpacing: 0.5,
+    marginBottom: Spacing.sm,
+  },
+  bioCard: {
+    backgroundColor: Colors.surface, borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
+  },
+  bioText: { fontSize: FontSize.md, color: Colors.textPrimary, lineHeight: 22 },
+  statsRow: { flexDirection: 'row', paddingHorizontal: Spacing.xl, marginBottom: Spacing.lg, gap: Spacing.sm },
+  statBadge: {
+    flex: 1, backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.lg, padding: Spacing.md,
+    alignItems: 'center',
+    ...Shadows.sm,
+  },
+  statEmoji: { fontSize: 22, marginBottom: 4 },
+  statValue: { fontSize: FontSize.xxl, fontWeight: '800', color: Colors.primary },
   statLabel: { fontSize: FontSize.xs, color: Colors.textSecondary, marginTop: 2 },
-  divider: { width: 1, height: 32, backgroundColor: Colors.divider },
-  section: { paddingHorizontal: Spacing.xl, marginTop: Spacing.xxl },
-  sectionTitle: { fontSize: FontSize.md, fontWeight: '600', color: Colors.textSecondary, marginBottom: Spacing.md, textTransform: 'uppercase' },
-  petCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.surface, borderRadius: BorderRadius.lg, overflow: 'hidden' },
-  petImage: { width: 100, height: 100 },
-  petInfo: { flex: 1, padding: Spacing.md },
-  petName: { fontSize: FontSize.lg, fontWeight: '600', color: Colors.textPrimary },
-  petBreed: { fontSize: FontSize.sm, color: Colors.textSecondary },
-  editBtn: { padding: Spacing.lg },
-  editIcon: { fontSize: 20 },
-  settings: { backgroundColor: Colors.surface, borderRadius: BorderRadius.lg, overflow: 'hidden' },
-  item: { flexDirection: 'row', alignItems: 'center', paddingVertical: Spacing.lg, paddingHorizontal: Spacing.lg },
-  emoji: { fontSize: 20, marginRight: Spacing.md },
-  label: { flex: 1, fontSize: FontSize.md, color: Colors.textPrimary },
+  tagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
+  tagPill: {
+    paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.chip,
+  },
+  tagText: { fontSize: FontSize.sm, fontWeight: '600' },
+  vaccineCard: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    backgroundColor: Colors.surface, borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
+  },
+  vaccineLeft: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
+  vaccineEmoji: { fontSize: 20 },
+  vaccineText: { fontSize: FontSize.md, fontWeight: '600' },
+  vaccineArrow: { fontSize: FontSize.sm, color: Colors.primary, fontWeight: '500' },
+  galleryScroll: { gap: Spacing.sm },
+  galleryItem: {
+    width: 100, height: 100, borderRadius: BorderRadius.lg,
+    overflow: 'hidden',
+  },
+  galleryImage: { width: '100%', height: '100%', backgroundColor: Colors.pastelOrange },
+  ownerCard: {
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: Colors.surface, borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
+  },
+  ownerInfo: { flex: 1, marginLeft: Spacing.md },
+  ownerName: { fontSize: FontSize.lg, fontWeight: '700', color: Colors.textPrimary },
+  ownerEmail: { fontSize: FontSize.sm, color: Colors.textSecondary },
+  editOwnerBtn: { padding: Spacing.sm },
+  editOwnerText: { fontSize: 18 },
+  settingsCard: {
+    backgroundColor: Colors.surface, borderRadius: BorderRadius.lg, overflow: 'hidden',
+  },
+  settingsItem: {
+    flexDirection: 'row', alignItems: 'center',
+    paddingVertical: Spacing.lg, paddingHorizontal: Spacing.lg,
+  },
+  settingsEmoji: { fontSize: 18, marginRight: Spacing.md },
+  settingsLabel: { flex: 1, fontSize: FontSize.md, color: Colors.textPrimary, fontWeight: '500' },
   destructive: { color: Colors.error },
-  arrow: { fontSize: 24, color: Colors.textMuted },
-  divider2: { height: 1, backgroundColor: Colors.divider, marginLeft: 52 },
-  version: { textAlign: 'center', fontSize: FontSize.xs, color: Colors.textMuted, marginTop: Spacing.xxxl, marginBottom: Spacing.xxl },
+  settingsArrow: { fontSize: 22, color: Colors.textMuted },
+  divider: { height: 1, backgroundColor: Colors.divider, marginLeft: 52 },
+  version: { textAlign: 'center', fontSize: FontSize.xs, color: Colors.textMuted, marginTop: Spacing.lg, marginBottom: Spacing.xl },
 });

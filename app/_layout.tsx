@@ -13,8 +13,9 @@ export default function RootLayout() {
         <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right', contentStyle: { backgroundColor: Colors.background } }}>
           <Stack.Screen name="(onboarding)/index" options={{ animation: 'fade' }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="settings" options={{ headerShown: false }} />
           <Stack.Screen name="pet/[id]" options={{ headerShown: true, headerTransparent: true, headerTintColor: Colors.textPrimary, headerBackTitle: 'Back', headerTitle: '' }} />
-          <Stack.Screen name="chat/[id]" options={{ headerShown: true, headerTintColor: Colors.textPrimary, headerBackTitle: 'Back', headerTitle: '' }} />
+          <Stack.Screen name="chat/[id]" options={{ headerShown: false }} />
         </Stack>
       </ThemeProvider>
     </AppProvider>

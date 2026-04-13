@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useAppContext } from '@/context/AppContext';
+import { useApp } from '@/context/AppContext';
 import { Colors, FontSize, BorderRadius, Spacing, Shadows } from '@/constants/theme';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -13,7 +13,7 @@ const slides = [
 
 export default function OnboardingScreen() {
   const router = useRouter();
-  const { completeOnboarding } = useAppContext();
+  const { completeOnboarding } = useApp();
 
   const handleStart = () => {
     completeOnboarding();
