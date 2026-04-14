@@ -40,6 +40,53 @@ SPRING_DATA_MONGODB_URI=<your-mongodb-uri>
 ADMIN_CORS_ALLOWED_ORIGIN_PATTERNS=https://exe-201-petdating-app.vercel.app,https://*.vercel.app
 ```
 
+### Render
+
+This repo now includes a root [render.yaml](C:/Users/MSI/Desktop/PRN232_Frontend/EXE201_PETDATING_APP/render.yaml:1) Blueprint plus a Docker-based backend image at [backend/Dockerfile](C:/Users/MSI/Desktop/PRN232_Frontend/EXE201_PETDATING_APP/backend/Dockerfile:1).
+
+1. Push the repository to GitHub.
+2. In Render, choose `New` -> `Blueprint`.
+3. Select this repository and branch.
+4. Render will detect `render.yaml` and create the `petdating-admin-api` web service.
+5. Set `SPRING_DATA_MONGODB_URI` to your production MongoDB connection string.
+6. Adjust `ADMIN_CORS_ALLOWED_ORIGIN_PATTERNS` if your frontend domain changes.
+7. Deploy.
+
+After the first successful deploy, Render will show a service URL such as:
+
+```text
+https://petdating-admin-api.onrender.com
+```
+
+That URL is the value you should copy into the Vercel frontend as:
+
+```text
+EXPO_PUBLIC_ADMIN_API_URL=https://petdating-admin-api.onrender.com
+```
+
+### Railway
+
+This repo also includes [backend/railway.toml](C:/Users/MSI/Desktop/PRN232_Frontend/EXE201_PETDATING_APP/backend/railway.toml:1) for config-as-code and uses the same [backend/Dockerfile](C:/Users/MSI/Desktop/PRN232_Frontend/EXE201_PETDATING_APP/backend/Dockerfile:1).
+
+1. Create a new Railway project from this GitHub repository.
+2. Create a service from the repo.
+3. Set the service `Root Directory` to `backend`.
+4. Set the Railway config file path to `/backend/railway.toml`.
+5. Add `SPRING_DATA_MONGODB_URI` and, if needed, `ADMIN_CORS_ALLOWED_ORIGIN_PATTERNS`.
+6. Deploy.
+
+After the first successful deploy, Railway will show a public service domain such as:
+
+```text
+https://petdating-admin-api-production.up.railway.app
+```
+
+Use that service domain as:
+
+```text
+EXPO_PUBLIC_ADMIN_API_URL=https://petdating-admin-api-production.up.railway.app
+```
+
 The admin sign-in now authenticates against the MongoDB `users` collection. Create or update a document with:
 
 ```json
