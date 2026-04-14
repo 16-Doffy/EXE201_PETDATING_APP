@@ -64,6 +64,15 @@ export default function SettingsScreen() {
           <SettingsItem emoji="🔐" label="Privacy & Security" />
         </SettingSection>
 
+        <SettingSection title="Admin">
+          <SettingsItem
+            emoji="🛡️"
+            label="Admin Console"
+            note="Dashboard, users and pet moderation"
+            onPress={() => router.push('/admin')}
+          />
+        </SettingSection>
+
         <SettingSection title="Notifications">
           <SettingsItem emoji="🔔" label="Push Notifications" note="On" />
           <View style={styles.divider} />
