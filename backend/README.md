@@ -9,6 +9,14 @@ Spring Boot admin API scaffold for the EXE201 PetDating MongoDB dataset.
 - MongoDB running locally
 - Seeded database `bosistive`
 
+## Environment variables
+
+- `PORT`: HTTP port for the Spring Boot server. Defaults to `8080`.
+- `SPRING_DATA_MONGODB_URI`: MongoDB connection string. Defaults to `mongodb://localhost:27017/bosistive`.
+- `ADMIN_USERNAME`: Basic Auth username for the admin frontend.
+- `ADMIN_PASSWORD`: Basic Auth password for the admin frontend.
+- `ADMIN_CORS_ALLOWED_ORIGIN_PATTERNS`: Comma-separated allowed origins/patterns. Defaults to localhost origins plus `https://*.vercel.app`.
+
 ## Run
 
 ```bash
@@ -21,6 +29,34 @@ Default Mongo URI:
 ```text
 mongodb://localhost:27017/bosistive
 ```
+
+## Deploy
+
+This backend is a standalone Spring Boot service. The current root `vercel.json` only exports the Expo web frontend, so `/api/v1/admin/*` is not served by the Vercel frontend deployment by default.
+
+Deploy the backend to a Java host such as Render, Railway, Fly.io, or your own VM/container, then set these environment variables on that backend service:
+
+```text
+PORT=8080
+SPRING_DATA_MONGODB_URI=<your-mongodb-uri>
+ADMIN_USERNAME=<admin-username>
+ADMIN_PASSWORD=<strong-password>
+ADMIN_CORS_ALLOWED_ORIGIN_PATTERNS=https://exe-201-petdating-app.vercel.app,https://*.vercel.app
+```
+
+After the backend is live, set the frontend build variable on Vercel:
+
+```text
+EXPO_PUBLIC_ADMIN_API_URL=https://<your-deployed-admin-api-host>
+```
+
+Example:
+
+```text
+EXPO_PUBLIC_ADMIN_API_URL=https://petdating-admin-api.onrender.com
+```
+
+Use the backend base URL only. Do not point `EXPO_PUBLIC_ADMIN_API_URL` at `https://exe-201-petdating-app.vercel.app` unless you separately add a same-origin proxy for `/api`.
 
 ## Admin endpoints
 

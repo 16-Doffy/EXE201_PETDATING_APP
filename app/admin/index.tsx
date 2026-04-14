@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Colors, BorderRadius, FontSize, Shadows, Spacing } from '@/constants/theme';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 import { getAdminDashboard } from '@/services/adminService';
 import { API_BASE_URL } from '@/services/api';
 import { AdminDashboardResponse } from '@/types/admin';
@@ -27,6 +28,7 @@ function StatCard({ label, value, tone }: { label: string; value: number; tone: 
 
 export default function AdminHomeScreen() {
   const router = useRouter();
+  const { signOut } = useAdminAuth();
   const [dashboard, setDashboard] = useState<AdminDashboardResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -63,15 +65,22 @@ export default function AdminHomeScreen() {
             <Text style={styles.title}>Admin Console</Text>
             <Text style={styles.subtitle}>Moderation and analytics for the mobile app.</Text>
           </View>
-          <TouchableOpacity style={[styles.backBtn, Shadows.sm]} onPress={() => router.back()} activeOpacity={0.8}>
-            <Text style={styles.backIcon}>←</Text>
-          </TouchableOpacity>
+          <View style={styles.headerActions}>
+            <TouchableOpacity style={[styles.sessionBtn, Shadows.sm]} onPress={signOut} activeOpacity={0.8}>
+              <Text style={styles.sessionBtnText}>Sign out</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.backBtn, Shadows.sm]} onPress={() => router.back()} activeOpacity={0.8}>
+              <Text style={styles.backIcon}>←</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={[styles.apiCard, Shadows.sm]}>
           <Text style={styles.apiTitle}>Backend</Text>
           <Text style={styles.apiText}>{API_BASE_URL}</Text>
-          <Text style={styles.apiHint}>Set `EXPO_PUBLIC_ADMIN_API_URL` if you are testing on a physical Android device.</Text>
+          <Text style={styles.apiHint}>
+            Set `EXPO_PUBLIC_ADMIN_API_URL` to your deployed admin backend URL on Vercel, or to your LAN/local backend when testing on devices.
+          </Text>
         </View>
 
         <View style={styles.actionRow}>
@@ -124,8 +133,18 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.background },
   content: { padding: Spacing.xl, paddingBottom: 120 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: Spacing.lg },
+  headerActions: { flexDirection: 'row', gap: Spacing.sm, alignItems: 'center' },
   title: { fontSize: FontSize.xxxl, fontWeight: '800', color: Colors.textPrimary },
   subtitle: { marginTop: 4, fontSize: FontSize.sm, color: Colors.textSecondary, maxWidth: 240 },
+  sessionBtn: {
+    minHeight: 42,
+    paddingHorizontal: Spacing.md,
+    borderRadius: BorderRadius.btn,
+    backgroundColor: Colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sessionBtnText: { fontSize: FontSize.sm, color: Colors.textSecondary, fontWeight: '700' },
   backBtn: {
     width: 42,
     height: 42,
