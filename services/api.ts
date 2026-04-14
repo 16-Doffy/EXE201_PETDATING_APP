@@ -2,10 +2,19 @@ import { Platform } from 'react-native';
 
 const ENV_API_URL = process.env.EXPO_PUBLIC_ADMIN_API_URL;
 
-const DEFAULT_BASE_URLS = Platform.select({
-  android: ['http://10.0.2.2:8080', 'http://127.0.0.1:8080', 'http://localhost:8080'],
-  default: ['http://127.0.0.1:8080', 'http://localhost:8080'],
-}) ?? ['http://127.0.0.1:8080'];
+// Detect if running in web browser
+const isWeb = typeof window !== 'undefined' && !Platform.OS;
+
+// Production/Vercel URLs
+const PRODUCTION_BASE_URL = 'https://exe-201-petdating-app.vercel.app';
+
+// Determine base URLs based on environment
+const DEFAULT_BASE_URLS = isWeb
+  ? [PRODUCTION_BASE_URL, 'http://localhost:8080', 'http://127.0.0.1:8080']
+  : Platform.select({
+      android: ['http://10.0.2.2:8080', 'http://127.0.0.1:8080', 'http://localhost:8080'],
+      default: ['http://127.0.0.1:8080', 'http://localhost:8080'],
+    }) ?? ['http://127.0.0.1:8080'];
 
 const API_BASE_URLS = [ENV_API_URL, ...DEFAULT_BASE_URLS].filter(Boolean) as string[];
 
