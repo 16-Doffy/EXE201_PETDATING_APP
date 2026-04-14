@@ -5,18 +5,21 @@ const ENV_API_URL = process.env.EXPO_PUBLIC_ADMIN_API_URL;
 // Detect if running in web browser
 const isWeb = typeof window !== 'undefined' && !Platform.OS;
 
-// Production/Vercel URLs
-const PRODUCTION_BASE_URL = 'https://exe-201-petdating-app.vercel.app';
-
-// Determine base URLs based on environment
+// For web (Vercel deployment), use relative path (backend on same domain)
+// For mobile, use specific backend URLs
 const DEFAULT_BASE_URLS = isWeb
-  ? [PRODUCTION_BASE_URL, 'http://localhost:8080', 'http://127.0.0.1:8080']
+  ? [
+      '', // Empty string = relative path to same domain (/api/v1/admin)
+      'https://exe-201-petdating-app.vercel.app/api',
+      'http://localhost:8080',
+      'http://127.0.0.1:8080',
+    ]
   : Platform.select({
       android: ['http://10.0.2.2:8080', 'http://127.0.0.1:8080', 'http://localhost:8080'],
       default: ['http://127.0.0.1:8080', 'http://localhost:8080'],
     }) ?? ['http://127.0.0.1:8080'];
 
-const API_BASE_URLS = [ENV_API_URL, ...DEFAULT_BASE_URLS].filter(Boolean) as string[];
+const API_BASE_URLS = [ENV_API_URL, ...DEFAULT_BASE_URLS].filter((url) => url !== undefined) as string[];
 
 type RequestOptions = {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
