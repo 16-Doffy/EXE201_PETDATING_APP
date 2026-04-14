@@ -5,12 +5,14 @@ import com.exe201.petdating.admin.domain.UserStatus;
 import com.exe201.petdating.admin.dto.AdminDashboardResponse;
 import com.exe201.petdating.admin.dto.AdminPetResponse;
 import com.exe201.petdating.admin.dto.AdminUserResponse;
+import com.exe201.petdating.admin.dto.PaginatedResponse;
 import com.exe201.petdating.admin.dto.UpdatePetModerationRequest;
 import com.exe201.petdating.admin.dto.UpdateUserStatusRequest;
 import com.exe201.petdating.admin.service.AdminService;
 import com.exe201.petdating.common.api.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,11 +21,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/v1/admin")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
     private final AdminService adminService;
@@ -34,9 +35,15 @@ public class AdminController {
     }
 
     @GetMapping("/users")
-    public ApiResponse<List<AdminUserResponse>> getUsers(@RequestParam(required = false) UserStatus status,
-                                                         @RequestParam(required = false) String search) {
-        return ApiResponse.ok("Admin users fetched successfully", adminService.getUsers(status, search));
+    public ApiResponse<PaginatedResponse<AdminUserResponse>> getUsers(
+            @RequestParam(required = false) UserStatus status,
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "DESC") String sortDirection) {
+        return ApiResponse.ok("Admin users fetched successfully", 
+            adminService.getUsers(status, search, page, size, sortBy, sortDirection));
     }
 
     @GetMapping("/users/{userId}")
@@ -51,10 +58,16 @@ public class AdminController {
     }
 
     @GetMapping("/pets")
-    public ApiResponse<List<AdminPetResponse>> getPets(@RequestParam(required = false) PetStatus status,
-                                                       @RequestParam(required = false) String search,
-                                                       @RequestParam(required = false) Boolean visible) {
-        return ApiResponse.ok("Admin pets fetched successfully", adminService.getPets(status, search, visible));
+    public ApiResponse<PaginatedResponse<AdminPetResponse>> getPets(
+            @RequestParam(required = false) PetStatus status,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Boolean visible,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "DESC") String sortDirection) {
+        return ApiResponse.ok("Admin pets fetched successfully", 
+            adminService.getPets(status, search, visible, page, size, sortBy, sortDirection));
     }
 
     @GetMapping("/pets/{petId}")

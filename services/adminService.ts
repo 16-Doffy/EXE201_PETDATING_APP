@@ -4,11 +4,12 @@ import {
   AdminPetResponse,
   AdminUserResponse,
   ApiEnvelope,
+  PaginatedResponse,
   PetStatus,
   UserStatus,
 } from '@/types/admin';
 
-function buildQuery(params: Record<string, string | boolean | undefined>) {
+function buildQuery(params: Record<string, string | number | boolean | undefined>) {
   const entries = Object.entries(params).filter(([, value]) => value !== undefined && value !== '');
   if (entries.length === 0) return '';
   return `?${entries
@@ -21,9 +22,16 @@ export async function getAdminDashboard() {
   return response.data;
 }
 
-export async function getAdminUsers(status?: UserStatus, search?: string) {
-  const response = await apiRequest<ApiEnvelope<AdminUserResponse[]>>(
-    `/api/v1/admin/users${buildQuery({ status, search })}`
+export async function getAdminUsers(
+  status?: UserStatus,
+  search?: string,
+  page: number = 0,
+  size: number = 20,
+  sortBy: string = 'createdAt',
+  sortDirection: string = 'DESC'
+) {
+  const response = await apiRequest<ApiEnvelope<PaginatedResponse<AdminUserResponse>>>(
+    `/api/v1/admin/users${buildQuery({ status, search, page, size, sortBy, sortDirection })}`
   );
   return response.data;
 }
@@ -36,9 +44,17 @@ export async function updateAdminUserStatus(userId: string, status: UserStatus) 
   return response.data;
 }
 
-export async function getAdminPets(status?: PetStatus, search?: string, visible?: boolean) {
-  const response = await apiRequest<ApiEnvelope<AdminPetResponse[]>>(
-    `/api/v1/admin/pets${buildQuery({ status, search, visible })}`
+export async function getAdminPets(
+  status?: PetStatus,
+  search?: string,
+  visible?: boolean,
+  page: number = 0,
+  size: number = 20,
+  sortBy: string = 'createdAt',
+  sortDirection: string = 'DESC'
+) {
+  const response = await apiRequest<ApiEnvelope<PaginatedResponse<AdminPetResponse>>>(
+    `/api/v1/admin/pets${buildQuery({ status, search, visible, page, size, sortBy, sortDirection })}`
   );
   return response.data;
 }

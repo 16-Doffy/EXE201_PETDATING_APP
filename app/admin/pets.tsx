@@ -42,14 +42,21 @@ export default function AdminPetsScreen() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<PetStatus | undefined>(undefined);
   const [visibleFilter, setVisibleFilter] = useState<boolean | undefined>(undefined);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [sortBy, setSortBy] = useState('createdAt');
+  const [sortDirection, setSortDirection] = useState('DESC');
 
-  const loadPets = async (silent = false) => {
+  const loadPets = async (silent = false, resetPage = false) => {
     try {
       if (silent) setRefreshing(true);
       else setLoading(true);
       setError(null);
-      const data = await getAdminPets(statusFilter, search.trim() || undefined, visibleFilter);
-      setPets(data);
+      const targetPage = resetPage ? 0 : page;
+      const data = await getAdminPets(statusFilter, search.trim() || undefined, visibleFilter, targetPage, 20, sortBy, sortDirection);
+      setPets(data.content);
+      setTotalPages(data.totalPages);
+      if (resetPage) setPage(0);
     } catch (err: any) {
       setError(err?.message || 'Failed to load pets.');
     } finally {
@@ -59,8 +66,12 @@ export default function AdminPetsScreen() {
   };
 
   useEffect(() => {
+    loadPets(false, true);
+  }, [statusFilter, visibleFilter, sortBy, sortDirection]);
+
+  useEffect(() => {
     loadPets();
-  }, [statusFilter, visibleFilter]);
+  }, [page]);
 
   const handleModeration = async (petId: string, isVisible: boolean, status: PetStatus) => {
     try {
@@ -93,10 +104,10 @@ export default function AdminPetsScreen() {
           placeholderTextColor={Colors.textMuted}
           value={search}
           onChangeText={setSearch}
-          onSubmitEditing={() => loadPets()}
+          onSubmitEditing={() => loadPets(false, true)}
           returnKeyType="search"
         />
-        <TouchableOpacity style={styles.searchBtn} onPress={() => loadPets()}>
+        <TouchableOpacity style={styles.searchBtn} onPress={() => loadPets(false, true)}>
           <Text style={styles.searchBtnText}>Search</Text>
         </TouchableOpacity>
       </View>
@@ -132,6 +143,21 @@ export default function AdminPetsScreen() {
         </View>
       </View>
 
+      <View style={styles.sortRow}>
+        <TouchableOpacity 
+          style={styles.sortBtn}
+          onPress={() => setSortBy(sortBy === 'createdAt' ? 'name' : 'createdAt')}
+        >
+          <Text style={styles.sortBtnText}>Sort: {sortBy === 'createdAt' ? 'Date' : 'Name'}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={styles.sortBtn}
+          onPress={() => setSortDirection(sortDirection === 'DESC' ? 'ASC' : 'DESC')}
+        >
+          <Text style={styles.sortBtnText}>{sortDirection === 'DESC' ? '↓' : '↑'}</Text>
+        </TouchableOpacity>
+      </View>
+
       {loading ? (
         <View style={styles.stateWrap}>
           <ActivityIndicator color={Colors.primary} />
@@ -146,65 +172,84 @@ export default function AdminPetsScreen() {
           </TouchableOpacity>
         </View>
       ) : (
-        <FlatList
-          data={pets}
-          keyExtractor={(item) => item.id}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => loadPets(true)} />}
-          contentContainerStyle={styles.list}
-          renderItem={({ item }) => (
-            <View style={[styles.card, Shadows.sm]}>
-              <View style={styles.cardTop}>
-                <View style={styles.petInfo}>
-                  <Text style={styles.petName}>{item.name}</Text>
-                  <Text style={styles.petMeta}>{item.species} • {item.breed} • {item.gender}</Text>
-                  <Text style={styles.petMeta}>Owner: {item.ownerName || 'Unknown'}{item.city ? ` • ${item.city}` : ''}</Text>
+        <>
+          <FlatList
+            data={pets}
+            keyExtractor={(item) => item.id}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => loadPets(true)} />}
+            contentContainerStyle={styles.list}
+            renderItem={({ item }) => (
+              <View style={[styles.card, Shadows.sm]}>
+                <View style={styles.cardTop}>
+                  <View style={styles.petInfo}>
+                    <Text style={styles.petName}>{item.name}</Text>
+                    <Text style={styles.petMeta}>{item.species} • {item.breed} • {item.gender}</Text>
+                    <Text style={styles.petMeta}>Owner: {item.ownerName || 'Unknown'}{item.city ? ` • ${item.city}` : ''}</Text>
+                  </View>
+                  <View style={styles.badgeColumn}>
+                    <View style={[styles.badge, { backgroundColor: petStatusColor(item.status) + '20' }]}>
+                      <Text style={[styles.badgeText, { color: petStatusColor(item.status) }]}>{item.status}</Text>
+                    </View>
+                    <View style={[styles.badge, { backgroundColor: (item.isVisible ? Colors.success : Colors.textMuted) + '20' }]}>
+                      <Text style={[styles.badgeText, { color: item.isVisible ? Colors.success : Colors.textSecondary }]}>
+                        {item.isVisible ? 'VISIBLE' : 'HIDDEN'}
+                      </Text>
+                    </View>
+                  </View>
                 </View>
-                <View style={styles.badgeColumn}>
-                  <View style={[styles.badge, { backgroundColor: petStatusColor(item.status) + '20' }]}>
-                    <Text style={[styles.badgeText, { color: petStatusColor(item.status) }]}>{item.status}</Text>
-                  </View>
-                  <View style={[styles.badge, { backgroundColor: (item.isVisible ? Colors.success : Colors.textMuted) + '20' }]}>
-                    <Text style={[styles.badgeText, { color: item.isVisible ? Colors.success : Colors.textSecondary }]}>
-                      {item.isVisible ? 'VISIBLE' : 'HIDDEN'}
-                    </Text>
-                  </View>
+
+                <Text numberOfLines={2} style={styles.bioText}>{item.bio || 'No bio available.'}</Text>
+
+                <View style={styles.actions}>
+                  <TouchableOpacity
+                    style={[styles.actionBtn, styles.successBtn]}
+                    disabled={updatingId === item.id}
+                    onPress={() => handleModeration(item.id, true, 'ACTIVE')}
+                  >
+                    <Text style={styles.actionText}>Show</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.actionBtn, styles.warnBtn]}
+                    disabled={updatingId === item.id}
+                    onPress={() => handleModeration(item.id, false, item.status)}
+                  >
+                    <Text style={styles.actionText}>Hide</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.actionBtn, styles.dangerBtn]}
+                    disabled={updatingId === item.id}
+                    onPress={() => handleModeration(item.id, false, 'ARCHIVED')}
+                  >
+                    <Text style={styles.actionText}>Archive</Text>
+                  </TouchableOpacity>
                 </View>
               </View>
-
-              <Text numberOfLines={2} style={styles.bioText}>{item.bio || 'No bio available.'}</Text>
-
-              <View style={styles.actions}>
-                <TouchableOpacity
-                  style={[styles.actionBtn, styles.successBtn]}
-                  disabled={updatingId === item.id}
-                  onPress={() => handleModeration(item.id, true, 'ACTIVE')}
-                >
-                  <Text style={styles.actionText}>Show</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.actionBtn, styles.warnBtn]}
-                  disabled={updatingId === item.id}
-                  onPress={() => handleModeration(item.id, false, item.status)}
-                >
-                  <Text style={styles.actionText}>Hide</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.actionBtn, styles.dangerBtn]}
-                  disabled={updatingId === item.id}
-                  onPress={() => handleModeration(item.id, false, 'ARCHIVED')}
-                >
-                  <Text style={styles.actionText}>Archive</Text>
-                </TouchableOpacity>
+            )}
+            ListEmptyComponent={
+              <View style={styles.stateWrap}>
+                <Text style={styles.errorTitle}>No pets found</Text>
+                <Text style={styles.stateText}>Try another search keyword or moderation filter.</Text>
               </View>
-            </View>
-          )}
-          ListEmptyComponent={
-            <View style={styles.stateWrap}>
-              <Text style={styles.errorTitle}>No pets found</Text>
-              <Text style={styles.stateText}>Try another search keyword or moderation filter.</Text>
-            </View>
-          }
-        />
+            }
+          />
+          <View style={styles.paginationWrap}>
+            <TouchableOpacity 
+              style={[styles.pageBtn, page === 0 && styles.pageBtnDisabled]}
+              onPress={() => setPage(Math.max(0, page - 1))}
+              disabled={page === 0}
+            >
+              <Text style={styles.pageBtnText}>← Prev</Text>
+            </TouchableOpacity>
+            <Text style={styles.pageInfo}>Page {page + 1} of {totalPages}</Text>
+            <TouchableOpacity 
+              style={[styles.pageBtn, page >= totalPages - 1 && styles.pageBtnDisabled]}
+              onPress={() => setPage(Math.min(totalPages - 1, page + 1))}
+              disabled={page >= totalPages - 1}
+            >
+              <Text style={styles.pageBtnText}>Next →</Text>
+            </TouchableOpacity>
+          </View>
+        </>
       )}
     </SafeAreaView>
   );
@@ -283,4 +328,28 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.btn,
   },
   retryText: { color: Colors.textInverse, fontWeight: '700' },
+  sortRow: { flexDirection: 'row', gap: Spacing.sm, paddingHorizontal: Spacing.xl, marginBottom: Spacing.md },
+  sortBtn: {
+    flex: 1,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.chip,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    alignItems: 'center',
+  },
+  sortBtnText: { color: Colors.textSecondary, fontWeight: '600', fontSize: FontSize.sm },
+  paginationWrap: { flexDirection: 'row', gap: Spacing.sm, paddingHorizontal: Spacing.xl, paddingVertical: Spacing.md, backgroundColor: Colors.surface, borderTopWidth: 1, borderTopColor: Colors.border },
+  pageBtn: {
+    flex: 1,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    backgroundColor: Colors.primary,
+    borderRadius: BorderRadius.btn,
+    alignItems: 'center',
+  },
+  pageBtnDisabled: { backgroundColor: Colors.border, opacity: 0.5 },
+  pageBtnText: { color: Colors.textInverse, fontWeight: '700', fontSize: FontSize.sm },
+  pageInfo: { alignSelf: 'center', color: Colors.textSecondary, fontWeight: '600', fontSize: FontSize.sm },
 });

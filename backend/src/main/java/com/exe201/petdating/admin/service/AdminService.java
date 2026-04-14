@@ -7,6 +7,7 @@ import com.exe201.petdating.admin.domain.UserStatus;
 import com.exe201.petdating.admin.dto.AdminDashboardResponse;
 import com.exe201.petdating.admin.dto.AdminPetResponse;
 import com.exe201.petdating.admin.dto.AdminUserResponse;
+import com.exe201.petdating.admin.dto.PaginatedResponse;
 import com.exe201.petdating.admin.dto.UpdatePetModerationRequest;
 import com.exe201.petdating.admin.dto.UpdateUserStatusRequest;
 import com.exe201.petdating.admin.repository.ConversationRepository;
@@ -59,9 +60,10 @@ public class AdminService {
         );
     }
 
-    public List<AdminUserResponse> getUsers(UserStatus status, String search) {
-        Query query = new Query().with(Sort.by(Sort.Direction.DESC, "createdAt"));
-
+    public PaginatedResponse<AdminUserResponse> getUsers(UserStatus status, String search, int page, int size, String sortBy, String sortDirection) {
+        Query query = new Query();
+        
+        // Apply filters
         if (status != null) {
             query.addCriteria(Criteria.where("status").is(status));
         }
@@ -77,10 +79,22 @@ public class AdminService {
             ));
         }
 
-        return mongoTemplate.find(query, UserDocument.class)
+        // Get total count
+        long totalElements = mongoTemplate.count(query, UserDocument.class);
+
+        // Apply sorting
+        Sort.Direction direction = "ASC".equalsIgnoreCase(sortDirection) ? Sort.Direction.ASC : Sort.Direction.DESC;
+        query.with(Sort.by(direction, sortBy));
+
+        // Apply pagination
+        query.skip((long) page * size).limit(size);
+
+        List<AdminUserResponse> content = mongoTemplate.find(query, UserDocument.class)
                 .stream()
                 .map(this::toAdminUserResponse)
                 .toList();
+
+        return PaginatedResponse.of(content, page, size, totalElements);
     }
 
     public AdminUserResponse getUserById(String userId) {
@@ -97,8 +111,8 @@ public class AdminService {
         return toAdminUserResponse(userRepository.save(user));
     }
 
-    public List<AdminPetResponse> getPets(PetStatus status, String search, Boolean visible) {
-        Query query = new Query().with(Sort.by(Sort.Direction.DESC, "createdAt"));
+    public PaginatedResponse<AdminPetResponse> getPets(PetStatus status, String search, Boolean visible, int page, int size, String sortBy, String sortDirection) {
+        Query query = new Query();
 
         if (status != null) {
             query.addCriteria(Criteria.where("status").is(status));
@@ -119,10 +133,22 @@ public class AdminService {
             ));
         }
 
-        return mongoTemplate.find(query, PetDocument.class)
+        // Get total count
+        long totalElements = mongoTemplate.count(query, PetDocument.class);
+
+        // Apply sorting
+        Sort.Direction direction = "ASC".equalsIgnoreCase(sortDirection) ? Sort.Direction.ASC : Sort.Direction.DESC;
+        query.with(Sort.by(direction, sortBy));
+
+        // Apply pagination
+        query.skip((long) page * size).limit(size);
+
+        List<AdminPetResponse> content = mongoTemplate.find(query, PetDocument.class)
                 .stream()
                 .map(this::toAdminPetResponse)
                 .toList();
+
+        return PaginatedResponse.of(content, page, size, totalElements);
     }
 
     public AdminPetResponse getPetById(String petId) {

@@ -1,0 +1,13 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: petdating-admin-api
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/bosistive
+
+logging:
+  level:
+    org.springframework.data.mongodb.core.MongoTemplate: INFO
