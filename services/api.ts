@@ -5,21 +5,32 @@ const ENV_API_URL = process.env.EXPO_PUBLIC_ADMIN_API_URL;
 // Detect if running in web browser
 const isWeb = typeof window !== 'undefined' && !Platform.OS;
 
-// For web (Vercel deployment), use relative path (backend on same domain)
-// For mobile, use specific backend URLs
-const DEFAULT_BASE_URLS = isWeb
-  ? [
-      '', // Empty string = relative path to same domain (/api/v1/admin)
-      'https://exe-201-petdating-app.vercel.app/api',
-      'http://localhost:8080',
-      'http://127.0.0.1:8080',
-    ]
-  : Platform.select({
-      android: ['http://10.0.2.2:8080', 'http://127.0.0.1:8080', 'http://localhost:8080'],
-      default: ['http://127.0.0.1:8080', 'http://localhost:8080'],
-    }) ?? ['http://127.0.0.1:8080'];
+// Backend URLs based on environment
+const BACKEND_URLS = {
+  production: 'https://exe-201-petdating-app.vercel.app', // Backend production URL
+  local: 'http://localhost:8080', // Local development
+};
 
-const API_BASE_URLS = [ENV_API_URL, ...DEFAULT_BASE_URLS].filter((url) => url !== undefined) as string[];
+// Determine which backend URL to use
+const getBackendUrls = () => {
+  if (isWeb) {
+    // Web (browser/Vercel)
+    return [
+      ENV_API_URL,
+      BACKEND_URLS.production,
+      BACKEND_URLS.local,
+      'http://127.0.0.1:8080',
+    ].filter(Boolean);
+  } else {
+    // Mobile (React Native)
+    return Platform.select({
+      android: ['http://10.0.2.2:8080', BACKEND_URLS.local, 'http://127.0.0.1:8080'],
+      default: [BACKEND_URLS.local, 'http://127.0.0.1:8080'],
+    }) ?? [BACKEND_URLS.local];
+  }
+};
+
+const API_BASE_URLS = getBackendUrls();
 
 type RequestOptions = {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
