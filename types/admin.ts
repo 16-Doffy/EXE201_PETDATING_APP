@@ -4,6 +4,16 @@ export type ApiEnvelope<T> = {
   data: T;
 };
 
+export type PaginatedResponse<T> = {
+  content: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
+};
+
 export type UserStatus = 'ACTIVE' | 'SUSPENDED' | 'BANNED';
 export type PetStatus = 'ACTIVE' | 'ARCHIVED';
 export type PetSpecies = 'DOG' | 'CAT' | 'BIRD' | 'OTHER';
