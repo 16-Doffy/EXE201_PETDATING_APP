@@ -1,12 +1,14 @@
-import React, { createContext, useContext, useReducer, ReactNode, useState } from 'react';
-import { Pet, Conversation, mockPets, mockConversations, mockMatches, currentUser } from '@/constants/mockData';
+import React, { createContext, useContext, useEffect, useReducer, ReactNode, useState } from 'react';
+import { AppRole, AppUser, Pet, Conversation, currentAdminCredentials, mockPets, mockConversations, mockMatches, currentUser } from '@/constants/mockData';
+import { AppSession, SessionAdminCredentials, clearStoredAppSession, setStoredAppSession, getStoredAppSession } from '@/services/appSession';
 
 interface AppState {
   favorites: string[];
   pets: Pet[];
   matches: string[];
   conversations: Conversation[];
-  user: typeof currentUser;
+  user: AppUser | null;
+  adminCredentials: SessionAdminCredentials | null;
   hasCompletedOnboarding: boolean;
   selectedCategory: 'all' | 'dog' | 'cat' | 'bird' | 'other';
   selectedGender: 'all' | 'male' | 'female';
@@ -25,17 +27,45 @@ type AppAction =
   | { type: 'SET_CATEGORY'; category: AppState['selectedCategory'] }
   | { type: 'SET_GENDER'; gender: AppState['selectedGender'] }
   | { type: 'COMPLETE_ONBOARDING' }
+  | { type: 'START_SESSION'; user?: AppUser; adminCredentials?: SessionAdminCredentials | null }
+  | { type: 'SIGN_OUT' }
   | { type: 'ADD_CONVERSATION'; conversation: Conversation }
   | { type: 'SET_SEARCH'; query: string }
   | { type: 'SET_FILTERS'; filters: Partial<AppState> }
 
-const initialState: AppState = {
+function cloneUser(user: AppUser) {
+  return {
+    ...user,
+    roles: [...user.roles],
+  };
+}
+
+function getDefaultAdminCredentials(user: AppUser | null | undefined) {
+  return user?.roles.includes('ADMIN') ? { ...currentAdminCredentials } : null;
+}
+
+function createDefaultSessionState(user: AppUser = currentUser) {
+  const sessionUser = cloneUser(user);
+
+  return {
+    user: sessionUser,
+    adminCredentials: getDefaultAdminCredentials(sessionUser),
+    hasCompletedOnboarding: false,
+  };
+}
+
+function createInitialState(): AppState {
+  const stored = getStoredAppSession();
+  const defaults = createDefaultSessionState();
+
+  return {
   favorites: ['1', '3', '4'],
   pets: mockPets,
   matches: mockMatches.map(p => p.id),
   conversations: mockConversations,
-  user: { ...currentUser },
-  hasCompletedOnboarding: false,
+    user: stored?.user ?? defaults.user,
+    adminCredentials: stored?.adminCredentials ?? defaults.adminCredentials,
+    hasCompletedOnboarding: stored?.hasCompletedOnboarding ?? defaults.hasCompletedOnboarding,
   selectedCategory: 'all',
   selectedGender: 'all',
   searchQuery: '',
@@ -45,7 +75,8 @@ const initialState: AppState = {
   onlineOnly: false,
   newestOnly: false,
   sameInterests: false,
-};
+  };
+}
 
 function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
@@ -54,6 +85,22 @@ function appReducer(state: AppState, action: AppAction): AppState {
     case 'SET_CATEGORY': return { ...state, selectedCategory: action.category };
     case 'SET_GENDER': return { ...state, selectedGender: action.gender };
     case 'COMPLETE_ONBOARDING': return { ...state, hasCompletedOnboarding: true };
+    case 'START_SESSION': {
+      const sessionUser = action.user ? cloneUser(action.user) : cloneUser(currentUser);
+      return {
+        ...state,
+        user: sessionUser,
+        adminCredentials: action.adminCredentials ?? getDefaultAdminCredentials(sessionUser),
+        hasCompletedOnboarding: true,
+      };
+    }
+    case 'SIGN_OUT':
+      return {
+        ...state,
+        user: null,
+        adminCredentials: null,
+        hasCompletedOnboarding: false,
+      };
     case 'ADD_CONVERSATION': return { ...state, conversations: [...state.conversations, action.conversation] };
     case 'SET_SEARCH': return { ...state, searchQuery: action.query };
     case 'SET_FILTERS': return { ...state, ...action.filters };
@@ -63,6 +110,10 @@ function appReducer(state: AppState, action: AppAction): AppState {
 
 interface AppContextType {
   state: AppState;
+  isAdmin: boolean;
+  hasRole: (role: AppRole) => boolean;
+  startSession: (user?: AppUser, adminCredentials?: SessionAdminCredentials | null) => void;
+  signOut: () => void;
   toggleFavorite: (petId: string) => void;
   setCategory: (category: AppState['selectedCategory']) => void;
   setGender: (gender: AppState['selectedGender']) => void;
@@ -86,13 +137,33 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(appReducer, initialState);
+  const [state, dispatch] = useReducer(appReducer, undefined, createInitialState);
   const [matchPopupPet, setMatchPopupPet] = useState<Pet | null>(null);
+  const hasRole = (role: AppRole) => Boolean(state.user?.roles.includes(role));
+  const isAdmin = hasRole('ADMIN');
+
+  useEffect(() => {
+    const session: AppSession = {
+      user: state.user,
+      adminCredentials: state.adminCredentials,
+      hasCompletedOnboarding: state.hasCompletedOnboarding,
+    };
+
+    if (!session.user && !session.adminCredentials && !session.hasCompletedOnboarding) {
+      clearStoredAppSession();
+      return;
+    }
+
+    setStoredAppSession(session);
+  }, [state.user, state.adminCredentials, state.hasCompletedOnboarding]);
 
   const toggleFavorite = (petId: string) => dispatch({ type: 'TOGGLE_FAVORITE', petId });
   const setCategory = (category: AppState['selectedCategory']) => dispatch({ type: 'SET_CATEGORY', category });
   const setGender = (gender: AppState['selectedGender']) => dispatch({ type: 'SET_GENDER', gender });
   const completeOnboarding = () => dispatch({ type: 'COMPLETE_ONBOARDING' });
+  const startSession = (user?: AppUser, adminCredentials?: SessionAdminCredentials | null) =>
+    dispatch({ type: 'START_SESSION', user, adminCredentials });
+  const signOut = () => dispatch({ type: 'SIGN_OUT' });
   const setSearch = (query: string) => dispatch({ type: 'SET_SEARCH', query });
   const setFilters = (filters: Partial<AppState>) => dispatch({ type: 'SET_FILTERS', filters: filters });
   const resetFilters = () => dispatch({ type: 'SET_FILTERS', filters: { maxDistance: 50, minAge: 0, maxAge: 120, onlineOnly: false, newestOnly: false, sameInterests: false } });
@@ -150,7 +221,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   return (
     <AppContext.Provider value={{
-      state, toggleFavorite, setCategory, setGender, completeOnboarding,
+      state, isAdmin, hasRole, startSession, signOut, toggleFavorite, setCategory, setGender, completeOnboarding,
       setSearch, setFilters, resetFilters,
       getFilteredPets, getFavoritePets, getMatchPets,
       getPetById, getConversationByPetId, createConversation, getFilteredConversations,

@@ -1,5 +1,5 @@
 import { Platform } from 'react-native';
-import { getAdminAuthorizationHeader } from '@/services/adminAuth';
+import { getSessionAuthorizationHeader } from '@/services/appSession';
 
 const ENV_API_URL = normalizeUrl(process.env.EXPO_PUBLIC_ADMIN_API_URL);
 const LOCALHOSTS = new Set(['localhost', '127.0.0.1']);
@@ -70,7 +70,7 @@ function parseBody(raw: string) {
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const method = options.method ?? 'GET';
   const headers: Record<string, string> = { ...(options.headers ?? {}) };
-  const authHeader = options.authHeader ?? getAdminAuthorizationHeader();
+  const authHeader = options.authHeader ?? getSessionAuthorizationHeader();
 
   if (options.body !== undefined) {
     headers['Content-Type'] = 'application/json';

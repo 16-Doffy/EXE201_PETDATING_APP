@@ -59,7 +59,12 @@ const myPet: Pet = {
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { state, getMatchPets, getFavoritePets, completeOnboarding } = useApp();
+  const { state, getMatchPets, getFavoritePets, signOut } = useApp();
+  const ownerUser = state.user ?? {
+    name: 'Guest',
+    email: 'guest@example.com',
+    avatar: 'https://placehold.co/80x80/png',
+  };
   const matches = getMatchPets();
   const favorites = getFavoritePets();
 
@@ -175,10 +180,10 @@ export default function ProfileScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>👤 Owner</Text>
           <View style={[styles.ownerCard, Shadows.sm]}>
-            <Avatar uri={state.user.avatar} name={state.user.name} size="lg" />
+            <Avatar uri={ownerUser.avatar} name={ownerUser.name} size="lg" />
             <View style={styles.ownerInfo}>
-              <Text style={styles.ownerName}>{state.user.name}</Text>
-              <Text style={styles.ownerEmail}>{state.user.email}</Text>
+              <Text style={styles.ownerName}>{ownerUser.name}</Text>
+              <Text style={styles.ownerEmail}>{ownerUser.email}</Text>
             </View>
             <TouchableOpacity style={styles.editOwnerBtn}>
               <Text style={styles.editOwnerText}>✏️</Text>
@@ -208,7 +213,7 @@ export default function ProfileScreen() {
             emoji="🚪"
             label="Log Out"
             destructive
-            onPress={() => { completeOnboarding(); router.replace('/(onboarding)'); }}
+            onPress={() => { signOut(); router.replace('/(onboarding)'); }}
           />
         </View>
 

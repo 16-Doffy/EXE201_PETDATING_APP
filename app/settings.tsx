@@ -37,7 +37,7 @@ function SettingSection({ title, children }: { title: string; children: React.Re
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { completeOnboarding } = useApp();
+  const { isAdmin, signOut } = useApp();
 
   return (
     <View style={[styles.safe, { paddingTop: insets.top }]}>
@@ -64,14 +64,16 @@ export default function SettingsScreen() {
           <SettingsItem emoji="🔐" label="Privacy & Security" />
         </SettingSection>
 
-        <SettingSection title="Admin">
-          <SettingsItem
-            emoji="🛡️"
-            label="Admin Console"
-            note="Dashboard, users and pet moderation"
-            onPress={() => router.push('/admin')}
-          />
-        </SettingSection>
+        {isAdmin ? (
+          <SettingSection title="Admin">
+            <SettingsItem
+              emoji="🛡️"
+              label="Admin Console"
+              note="Dashboard, users and pet moderation"
+              onPress={() => router.push('/admin')}
+            />
+          </SettingSection>
+        ) : null}
 
         <SettingSection title="Notifications">
           <SettingsItem emoji="🔔" label="Push Notifications" note="On" />
@@ -109,7 +111,7 @@ export default function SettingsScreen() {
             label="Log Out"
             destructive
             onPress={() => {
-              completeOnboarding();
+              signOut();
               router.replace('/(onboarding)');
             }}
           />

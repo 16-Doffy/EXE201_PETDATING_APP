@@ -13,10 +13,10 @@ const slides = [
 
 export default function OnboardingScreen() {
   const router = useRouter();
-  const { completeOnboarding } = useApp();
+  const { startSession } = useApp();
 
   const handleStart = () => {
-    completeOnboarding();
+    startSession();
     router.replace('/(tabs)');
   };
 

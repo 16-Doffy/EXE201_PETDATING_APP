@@ -1,5 +1,13 @@
 // Mock Data
 export interface Owner { id: string; name: string; avatar: string; phone?: string; }
+export type AppRole = 'USER' | 'ADMIN';
+export interface AppUser {
+  id: string;
+  name: string;
+  email: string;
+  avatar: string;
+  roles: AppRole[];
+}
 export interface Pet {
   id: string; name: string; species: 'dog' | 'cat' | 'bird' | 'other';
   breed: string; age: number; gender: 'male' | 'female';
@@ -106,4 +114,15 @@ export const mockConversations: Conversation[] = [
   },
 ];
 
-export const currentUser = { id: 'user1', name: 'Alex Johnson', email: 'alex@example.com', avatar: petThumb(900) };
+export const currentUser: AppUser = {
+  id: 'user1',
+  name: 'Alex Johnson',
+  email: 'alex@example.com',
+  avatar: petThumb(900),
+  roles: ['ADMIN'],
+};
+
+export const currentAdminCredentials = {
+  username: 'admin',
+  password: 'Admin123!',
+};
