@@ -169,6 +169,7 @@ public class AdminService {
     private AdminUserResponse toAdminUserResponse(UserDocument user) {
         return new AdminUserResponse(
                 user.getId(),
+                user.getUsername(),
                 user.getEmail(),
                 user.getName(),
                 user.getAvatarUrl(),

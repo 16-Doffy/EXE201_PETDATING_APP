@@ -32,6 +32,7 @@ export type AdminDashboardResponse = {
 
 export type AdminUserResponse = {
   id: string;
+  username?: string;
   email: string;
   name: string;
   avatarUrl?: string;

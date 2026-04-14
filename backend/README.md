@@ -13,8 +13,6 @@ Spring Boot admin API scaffold for the EXE201 PetDating MongoDB dataset.
 
 - `PORT`: HTTP port for the Spring Boot server. Defaults to `8080`.
 - `SPRING_DATA_MONGODB_URI`: MongoDB connection string. Defaults to `mongodb://localhost:27017/bosistive`.
-- `ADMIN_USERNAME`: Basic Auth username for the admin frontend.
-- `ADMIN_PASSWORD`: Basic Auth password for the admin frontend.
 - `ADMIN_CORS_ALLOWED_ORIGIN_PATTERNS`: Comma-separated allowed origins/patterns. Defaults to localhost origins plus `https://*.vercel.app`.
 
 ## Run
@@ -39,10 +37,22 @@ Deploy the backend to a Java host such as Render, Railway, Fly.io, or your own V
 ```text
 PORT=8080
 SPRING_DATA_MONGODB_URI=<your-mongodb-uri>
-ADMIN_USERNAME=<admin-username>
-ADMIN_PASSWORD=<strong-password>
 ADMIN_CORS_ALLOWED_ORIGIN_PATTERNS=https://exe-201-petdating-app.vercel.app,https://*.vercel.app
 ```
+
+The admin sign-in now authenticates against the MongoDB `users` collection. Create or update a document with:
+
+```json
+{
+  "username": "admin",
+  "email": "admin@petdating.local",
+  "passwordHash": "{noop}Admin123!",
+  "roles": ["ADMIN"],
+  "status": "ACTIVE"
+}
+```
+
+`{noop}` is supported for local/dev seeding. Replace it with a stronger encoded hash before using this flow in a shared or production environment.
 
 After the backend is live, set the frontend build variable on Vercel:
 

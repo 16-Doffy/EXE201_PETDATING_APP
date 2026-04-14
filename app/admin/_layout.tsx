@@ -54,15 +54,15 @@ export default function AdminLayout() {
         <View style={styles.authWrap}>
           <View style={[styles.authCard, Shadows.card]}>
             <Text style={styles.title}>Admin Sign In</Text>
-            <Text style={styles.subtitle}>Use the backend `ADMIN_USERNAME` and `ADMIN_PASSWORD` to open the admin console.</Text>
+            <Text style={styles.subtitle}>Sign in with your MongoDB admin account using username or email plus password.</Text>
 
             <View style={styles.fieldWrap}>
-              <Text style={styles.fieldLabel}>Username</Text>
+              <Text style={styles.fieldLabel}>Username or Email</Text>
               <TextInput
                 autoCapitalize="none"
                 autoCorrect={false}
                 editable={!loading}
-                placeholder="admin"
+                placeholder="admin or admin@petdating.local"
                 placeholderTextColor={Colors.textMuted}
                 style={styles.input}
                 value={username}

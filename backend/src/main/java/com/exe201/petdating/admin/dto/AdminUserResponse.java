@@ -7,6 +7,7 @@ import java.util.List;
 
 public record AdminUserResponse(
         String id,
+        String username,
         String email,
         String name,
         String avatarUrl,
