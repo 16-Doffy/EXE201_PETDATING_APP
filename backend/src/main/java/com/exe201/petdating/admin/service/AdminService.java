@@ -17,6 +17,7 @@ import com.exe201.petdating.admin.repository.PetRepository;
 import com.exe201.petdating.admin.repository.UserRepository;
 import com.exe201.petdating.common.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -31,10 +32,15 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class AdminService {
 
+    @Qualifier("adminUserRepository")
     private final UserRepository userRepository;
+    @Qualifier("adminPetRepository")
     private final PetRepository petRepository;
+    @Qualifier("adminMatchRepository")
     private final MatchRepository matchRepository;
+    @Qualifier("adminConversationRepository")
     private final ConversationRepository conversationRepository;
+    @Qualifier("adminMessageRepository")
     private final MessageRepository messageRepository;
     private final MongoTemplate mongoTemplate;
 

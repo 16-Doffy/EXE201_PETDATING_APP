@@ -1,0 +1,13 @@
+package com.exe201.petdating.main.dto;
+
+import lombok.*;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class ApiResponse<T> {
+    private Boolean success;
+    private String message;
+    private T data;
+}

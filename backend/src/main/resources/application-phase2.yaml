@@ -1,0 +1,212 @@
+# Application Configuration for Phase 2 (WebSocket & OAuth2)
+# Copy this to application-dev.yaml or application-prod.yaml
+
+spring:
+  application:
+    name: petdating-api
+
+  # Database Configuration
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/petdating_db
+      # Or for MongoDB Atlas:
+      # uri: mongodb+srv://username:password@cluster.mongodb.net/petdating_db
+
+  # JWT Security Configuration (from Phase 1)
+  jwt:
+    secret: your-super-secret-jwt-key-change-this-in-production-min-32-chars
+    expiration: 86400000  # 24 hours in milliseconds
+
+  # Security Configuration
+  security:
+    user:
+      name: admin
+      password: admin123
+
+    # OAuth2 Configuration for Social Login
+    oauth2:
+      client:
+        registration:
+          # Google OAuth
+          google:
+            client-id: YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com
+            client-secret: YOUR_GOOGLE_CLIENT_SECRET
+            redirect-uri: "{baseUrl}/login/oauth2/code/google"
+            scope:
+              - profile
+              - email
+            client-name: Google
+
+          # Facebook OAuth
+          facebook:
+            client-id: YOUR_FACEBOOK_APP_ID
+            client-secret: YOUR_FACEBOOK_APP_SECRET
+            redirect-uri: "{baseUrl}/login/oauth2/code/facebook"
+            scope:
+              - public_profile
+              - email
+            client-name: Facebook
+
+          # GitHub OAuth (optional)
+          github:
+            client-id: YOUR_GITHUB_CLIENT_ID
+            client-secret: YOUR_GITHUB_CLIENT_SECRET
+            redirect-uri: "{baseUrl}/login/oauth2/code/github"
+            scope:
+              - user:email
+            client-name: GitHub
+
+        provider:
+          # Google provider settings
+          google:
+            userInfoUri: https://www.googleapis.com/oauth2/v3/userinfo
+            userNameAttribute: email
+
+          # Facebook provider settings
+          facebook:
+            userInfoUri: https://graph.facebook.com/me?fields=id,name,email,picture
+            userNameAttribute: id
+
+          # GitHub provider settings
+          github:
+            userInfoUri: https://api.github.com/user
+            userNameAttribute: login
+
+  # Email Configuration (for notifications, Phase 2+)
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: your-email@gmail.com
+    password: your-app-specific-password
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          starttls.protocol: TLSv1.2
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+  # Redis Configuration (for caching OAuth tokens, Phase 2+)
+  redis:
+    host: localhost
+    port: 6379
+    password: 
+    timeout: 2000
+    jedis:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+
+  # WebSocket Configuration (automatic, but can be customized)
+  websocket:
+    stomp:
+      endpoint: /api/ws
+      allowed-origins: "http://localhost:3000,http://localhost:8081"
+
+# Server Configuration
+server:
+  servlet:
+    context-path: /api
+  port: 8080
+  compression:
+    enabled: true
+    min-response-size: 1024
+
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    com.exe201.petdating: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.security.oauth2: DEBUG
+    org.springframework.messaging: DEBUG
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+# Application-specific Configuration
+app:
+  jwtSecret: ${spring.jwt.secret}
+  jwtExpirationMs: ${spring.jwt.expiration}
+  cors:
+    allowed-origins:
+      - http://localhost:3000
+      - http://localhost:8081
+      - http://192.168.1.*
+    allowed-methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+    allowed-headers:
+      - "*"
+    allow-credentials: true
+    max-age: 3600
+
+# File Upload Configuration (Phase 3)
+file-upload:
+  # AWS S3 Configuration
+  s3:
+    enabled: false
+    access-key: YOUR_AWS_ACCESS_KEY
+    secret-key: YOUR_AWS_SECRET_KEY
+    region: us-east-1
+    bucket: petdating-uploads
+    folder: uploads
+
+  # Cloudinary Configuration
+  cloudinary:
+    enabled: false
+    cloud-name: YOUR_CLOUDINARY_NAME
+    api-key: YOUR_CLOUDINARY_API_KEY
+    api-secret: YOUR_CLOUDINARY_API_SECRET
+
+# Payment Gateway Configuration (Phase 3)
+payment:
+  # MoMo Payment
+  momo:
+    enabled: false
+    partner-code: MOMO
+    access-key: YOUR_MOMO_ACCESS_KEY
+    secret-key: YOUR_MOMO_SECRET_KEY
+    endpoint: https://test-payment.momo.vn/v2/gateway/api/create
+
+  # ZaloPay
+  zalopay:
+    enabled: false
+    app-id: YOUR_ZALOPAY_APP_ID
+    key1: YOUR_ZALOPAY_KEY1
+    key2: YOUR_ZALOPAY_KEY2
+    endpoint: https://sandbox.zalopay.com.vn/api/v2/create
+
+---
+# USAGE INSTRUCTIONS:
+
+# Development Environment (.env or application-dev.yaml):
+# spring.profiles.active=dev
+# MONGO_URI=mongodb://localhost:27017/petdating_db
+# JWT_SECRET=dev-secret-key-12345678901234567890
+# GOOGLE_CLIENT_ID=your-google-dev-id
+# GOOGLE_CLIENT_SECRET=your-google-dev-secret
+# FACEBOOK_APP_ID=your-facebook-dev-id
+# FACEBOOK_APP_SECRET=your-facebook-dev-secret
+
+# Production Environment (application-prod.yaml):
+# spring.profiles.active=prod
+# MONGO_URI=mongodb+srv://user:pass@cluster.mongodb.net/petdating_db
+# JWT_SECRET=prod-secret-key-generated-by-SecureRandom
+# GOOGLE_CLIENT_ID=your-google-prod-id
+# GOOGLE_CLIENT_SECRET=your-google-prod-secret
+# FACEBOOK_APP_ID=your-facebook-prod-id
+# FACEBOOK_APP_SECRET=your-facebook-prod-secret
+
+# To use environment variables in application.yaml:
+# ${ENV_VAR_NAME} or ${ENV_VAR_NAME:default_value}
+
+# Example:
+# spring.data.mongodb.uri: ${MONGO_URI:mongodb://localhost:27017/petdating_db}

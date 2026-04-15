@@ -1,12 +1,18 @@
 server:
-  port: 8080
+  port: ${PORT:8080}
 
 spring:
   application:
     name: petdating-admin-api
+  main:
+    allow-bean-definition-overriding: true
   data:
     mongodb:
-      uri: mongodb://localhost:27017/bosistive
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb://localhost:27017/bosistive}
+
+admin:
+  security:
+    allowed-origin-patterns: ${ADMIN_CORS_ALLOWED_ORIGIN_PATTERNS:http://localhost:3000,http://localhost:8080,http://127.0.0.1:3000,http://127.0.0.1:8080,https://*.vercel.app}
 
 logging:
   level:

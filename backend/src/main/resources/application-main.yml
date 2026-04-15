@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: petdating-main-api
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/petdating_main
+      # For MongoDB Atlas, use:
+      # uri: mongodb+srv://username:password@cluster.mongodb.net/petdating_main?retryWrites=true&w=majority
+
+logging:
+  level:
+    root: INFO
+    com.exe201.petdating: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %logger{36} - %msg%n"
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:your-secret-key-change-in-production}
+    expiration: 86400 # 24 hours in seconds
+
+server:
+  port: 8080
+  servlet:
+    context-path: /

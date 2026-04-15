@@ -1,0 +1,33 @@
+server:
+  servlet:
+    context-path: /api
+  port: 8080
+  compression:
+    enabled: true
+    min-response-size: 1024
+
+spring:
+  application:
+    name: petdating-api
+
+  # MongoDB Configuration
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017
+      database: bosistive
+
+app:
+  # JWT Configuration
+  jwt:
+    secret: your-secret-jwt-key-change-in-production-min-32-characters-long
+    expiration: 86400000  # 24 hours
+
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    com.exe201.petdating: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.data.mongodb: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %logger{36} - %msg%n"
